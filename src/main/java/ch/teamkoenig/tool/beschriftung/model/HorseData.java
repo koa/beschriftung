@@ -11,4 +11,7 @@ public class HorseData {
 	private String horseName;
 	private String horseDetailText;
 	private String horseCode;
+	private boolean active;
+	private int headNumberCount;
+	private int harnessNumberCount;
 }

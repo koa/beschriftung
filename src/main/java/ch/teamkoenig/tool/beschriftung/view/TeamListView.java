@@ -1,7 +1,13 @@
 package ch.teamkoenig.tool.beschriftung.view;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -15,13 +21,19 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.wolfie.clientstorage.ClientStorage;
+import com.itextpdf.kernel.geom.PageSize;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.StreamResource;
+import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.Column;
@@ -31,6 +43,11 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.components.grid.Editor;
 
+import ch.teamkoenig.tool.beschriftung.layout.Drawable;
+import ch.teamkoenig.tool.beschriftung.layout.HarnessNumberLayout;
+import ch.teamkoenig.tool.beschriftung.layout.HeadNumberLayout;
+import ch.teamkoenig.tool.beschriftung.layout.Layouter;
+import ch.teamkoenig.tool.beschriftung.layout.WagonNumberLayout;
 import ch.teamkoenig.tool.beschriftung.model.HorseData;
 import ch.teamkoenig.tool.beschriftung.model.TeamData;
 import lombok.extern.slf4j.Slf4j;
@@ -98,16 +115,26 @@ public class TeamListView extends CustomComponent implements View {
 			teamList.replaceAll(t -> t == b ? currentTeamData.get().build() : t);
 			updater.run();
 		});
+		final Column<TeamData, Boolean> activeColumn = teamGrid.addColumn(e -> e.isActive(), b -> b ? "x" : "");
+		activeColumn.setCaption("Active");
+		activeColumn.setEditorComponent(new CheckBox(), (b, v) -> currentTeamData.get().active(v));
 		final Column<TeamData, String> nameColumn = teamGrid.addColumn(e -> e.getTeamName());
 		nameColumn.setCaption("Name");
-		nameColumn.setEditorComponent(new TextField(), (b, v) -> {
-			currentTeamData.get().teamName(v);
-		});
+		nameColumn.setEditorComponent(new TextField(), (b, v) -> currentTeamData.get().teamName(v));
 		final Column<TeamData, String> numberColumn = teamGrid.addColumn(e -> e.getTeamCode());
 		numberColumn.setCaption("Nummer");
-		numberColumn.setEditorComponent(new TextField(), (b, v) -> {
-			currentTeamData.get().teamCode(v);
-		});
+		numberColumn.setEditorComponent(new TextField(), (b, v) -> currentTeamData.get().teamCode(v));
+
+		final Column<TeamData, Integer> bigCountColumn = teamGrid.addColumn(e -> e.getBigWagonNumberCount());
+		bigCountColumn.setCaption("Big Numbers");
+		bigCountColumn.setEditorComponent(createCountComboBox(),
+				(b, v) -> currentTeamData.get().bigWagonNumberCount(v));
+
+		final Column<TeamData, Integer> smallCountColumn = teamGrid.addColumn(e -> e.getSmallWagonNumberCount());
+		smallCountColumn.setCaption("Small Numbers");
+		smallCountColumn.setEditorComponent(createCountComboBox(),
+				(b, v) -> currentTeamData.get().smallWagonNumberCount(v));
+
 		editor.setEnabled(true);
 
 		final HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -122,6 +149,11 @@ public class TeamListView extends CustomComponent implements View {
 				final Grid<HorseData> horsesGrid = new Grid<>(horsesDataProvider);
 				final AtomicReference<HorseData.HorseDataBuilder> newHorseData = new AtomicReference<>();
 
+				final Column<HorseData, Boolean> horseActiveColumn = horsesGrid.addColumn(e -> e.isActive(),
+						b -> b ? "x" : "");
+				horseActiveColumn.setCaption("Active");
+				horseActiveColumn.setEditorComponent(new CheckBox(), (b, v) -> newHorseData.get().active(v));
+
 				final Column<HorseData, String> horseNumberColumn = horsesGrid.addColumn(e -> e.getHorseCode());
 				horseNumberColumn.setCaption("Nummer");
 				horseNumberColumn.setEditorComponent(new TextField(), (b, v) -> newHorseData.get().horseCode(v));
@@ -133,6 +165,17 @@ public class TeamListView extends CustomComponent implements View {
 				final Column<HorseData, String> horseDetailColumn = horsesGrid.addColumn(e -> e.getHorseDetailText());
 				horseDetailColumn.setCaption("Detail");
 				horseDetailColumn.setEditorComponent(new TextField(), (b, v) -> newHorseData.get().horseDetailText(v));
+
+				final Column<HorseData, Integer> harnessCountColumn = horsesGrid
+						.addColumn(e -> e.getHarnessNumberCount());
+				harnessCountColumn.setCaption("Harness");
+				harnessCountColumn.setEditorComponent(createCountComboBox(),
+						(b, v) -> newHorseData.get().harnessNumberCount(v));
+
+				final Column<HorseData, Integer> headCountColumn = horsesGrid.addColumn(e -> e.getHeadNumberCount());
+				headCountColumn.setCaption("Head Numbers");
+				headCountColumn.setEditorComponent(createCountComboBox(),
+						(b, v) -> newHorseData.get().headNumberCount(v));
 
 				final AtomicReference<HorseData> oldHorseData = new AtomicReference<>();
 				final Editor<HorseData> horseEditor = horsesGrid.getEditor();
@@ -215,6 +258,57 @@ public class TeamListView extends CustomComponent implements View {
 		});
 		buttonLayout.addComponent(addButton);
 
+		final Button printButton = new Button("Print");
+
+		final StreamSource source = new StreamSource() {
+
+			@Override
+			public InputStream getStream() {
+				try {
+					final Collection<Drawable> drawables = new ArrayList<>();
+					for (final TeamData teamData : teamList) {
+						if (teamData.isActive()) {
+							for (int i = 0; i < teamData.getBigWagonNumberCount(); i++) {
+								drawables.add(new WagonNumberLayout(teamData.getTeamCode(), true));
+							}
+							for (int i = 0; i < teamData.getSmallWagonNumberCount(); i++) {
+								drawables.add(new WagonNumberLayout(teamData.getTeamCode(), false));
+							}
+							final List<HorseData> horses = teamData.getHorses();
+							if (horses != null) {
+								for (final HorseData horseData : horses) {
+									if (horseData.isActive()) {
+										for (int i = 0; i < horseData.getHarnessNumberCount(); i++) {
+											drawables.add(new HarnessNumberLayout(horseData.getHorseCode(),
+													horseData.getHorseName(), horseData.getHorseDetailText()));
+										}
+										for (int i = 0; i < horseData.getHarnessNumberCount(); i++) {
+											drawables.add(new HeadNumberLayout(horseData.getHorseCode(),
+													horseData.getHorseName(), horseData.getHorseDetailText()));
+										}
+									}
+								}
+							}
+						}
+					}
+					final ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
+					if (!drawables.isEmpty()) {
+						final OutputStream target = arrayOutputStream;
+						Layouter.layout(drawables, target, PageSize.A4.rotate(), 5 * 72 / 25.4f);
+					}
+					return new ByteArrayInputStream(arrayOutputStream.toByteArray());
+				} catch (final IOException e) {
+					throw new RuntimeException("Error creating pdf", e);
+				}
+			}
+		};
+		final StreamResource pdfResource = new StreamResource(source, "labels.pdf");
+		final FileDownloader fileDownloader = new FileDownloader(pdfResource);
+		fileDownloader.setOverrideContentType(false);
+		fileDownloader.extend(printButton);
+
+		buttonLayout.addComponent(printButton);
+
 		final VerticalLayout rootLayout = new VerticalLayout();
 		rootLayout.addComponent(teamGrid);
 		rootLayout.addComponent(buttonLayout);
@@ -225,6 +319,13 @@ public class TeamListView extends CustomComponent implements View {
 
 		setCompositionRoot(rootLayout);
 		setSizeFull();
+	}
+
+	private ComboBox<Integer> createCountComboBox() {
+		final ComboBox<Integer> comboBox = new ComboBox<>("", Arrays.asList(0, 1, 2, 3));
+		comboBox.setEmptySelectionAllowed(false);
+		comboBox.setTextInputAllowed(false);
+		return comboBox;
 	}
 
 	@Override

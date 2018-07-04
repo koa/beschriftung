@@ -13,4 +13,7 @@ public class TeamData {
 	private String teamName;
 	private String teamCode;
 	private List<HorseData> horses;
+	private boolean active;
+	private int bigWagonNumberCount;
+	private int smallWagonNumberCount;
 }
