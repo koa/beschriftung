@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.wolfie.clientstorage.ClientStorage;
 import com.itextpdf.kernel.geom.PageSize;
+import com.vaadin.annotations.Title;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.navigator.View;
@@ -53,7 +54,8 @@ import ch.teamkoenig.tool.beschriftung.model.TeamData;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@SpringView(name = "team-list")
+@SpringView
+@Title("Labels")
 public class TeamListView extends CustomComponent implements View {
 
 	public TeamListView() {
