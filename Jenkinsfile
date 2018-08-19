@@ -16,6 +16,7 @@ pipeline {
           PREVIEW_VERSION = "0.0.0-SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER"
           PREVIEW_NAMESPACE = "$APP_NAME-$BRANCH_NAME".toLowerCase()
           HELM_RELEASE = "$PREVIEW_NAMESPACE".toLowerCase()
+          _JAVA_OPTIONS = "-Xmx768m"
         }
         steps {
           container('maven') {
