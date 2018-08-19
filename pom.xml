@@ -79,6 +79,7 @@
 					<draftCompile>false</draftCompile>
 					<style>PRETTY</style>
 					<!--<strict>true</strict> -->
+                    <extraJvmArgs>-Xmx768M</extraJvmArgs>
 					<runTarget>http://localhost:8080/</runTarget>
 				</configuration>
 				<executions>
