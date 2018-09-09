@@ -21,12 +21,17 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        - --management.port=={{ .Values.service.managementPort }}
         ports:
         - containerPort: {{ .Values.service.internalPort }}
+          name: http
+        - containerPort: {{ .Values.service.managementPort }}
+          name: management
         livenessProbe:
           httpGet:
             path: {{ .Values.probePath }}
-            port: {{ .Values.service.internalPort }}
+            port: {{ .Values.service.managementPort }}
           initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           successThreshold: {{ .Values.livenessProbe.successThreshold }}
@@ -34,7 +39,7 @@ spec:
         readinessProbe:
           httpGet:
             path: {{ .Values.probePath }}
-            port: {{ .Values.service.internalPort }}
+            port: {{ .Values.service.managementPort }}
           periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
           successThreshold: {{ .Values.readinessProbe.successThreshold }}
           timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
