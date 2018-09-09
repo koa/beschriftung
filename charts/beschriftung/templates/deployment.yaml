@@ -21,8 +21,9 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        args:
-        - --management.port=={{ .Values.service.managementPort }}
+        env:
+        - name: MANAGEMENT_SERVER_PORT
+          value: {{ .Values.service.managementPort }}       
         ports:
         - containerPort: {{ .Values.service.internalPort }}
           name: http
