@@ -1,6 +1,7 @@
 package ch.teamkoenig.tool.beschriftung.model;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import lombok.Builder;
 import lombok.Value;
 
@@ -8,7 +9,7 @@ import java.util.List;
 
 @Value
 @Builder(toBuilder = true)
-@AllArgsConstructor
+@JsonDeserialize(builder = TeamData.TeamDataBuilder.class)
 public class TeamData {
   private String teamName;
   private String teamCode;
@@ -16,4 +17,7 @@ public class TeamData {
   private boolean active;
   private int bigWagonNumberCount;
   private int smallWagonNumberCount;
+
+  @JsonPOJOBuilder(withPrefix = "")
+  public static class TeamDataBuilder {}
 }

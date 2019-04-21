@@ -1,12 +1,13 @@
 package ch.teamkoenig.tool.beschriftung.model;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import lombok.Builder;
 import lombok.Value;
 
 @Value
 @Builder(toBuilder = true)
-@AllArgsConstructor
+@JsonDeserialize(builder = HorseData.HorseDataBuilder.class)
 public class HorseData {
   private String horseName;
   private String horseDetailText;
@@ -14,4 +15,7 @@ public class HorseData {
   private boolean active;
   private int headNumberCount;
   private int harnessNumberCount;
+
+  @JsonPOJOBuilder(withPrefix = "")
+  public static class HorseDataBuilder {}
 }
