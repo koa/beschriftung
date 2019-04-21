@@ -13,14 +13,17 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @SpringUI
 @Theme(ValoTheme.THEME_NAME)
 @Widgetset("BeschriftungWidgetSet")
 public class AppUi extends UI {
 
-  @Autowired private SpringViewProvider viewProvider;
+  private final SpringViewProvider viewProvider;
+
+  public AppUi(final SpringViewProvider viewProvider) {
+    this.viewProvider = viewProvider;
+  }
 
   @Override
   protected void init(final VaadinRequest vaadinRequest) {
@@ -44,9 +47,7 @@ public class AppUi extends UI {
       } else menuLabel = viewName;
       mainMenu.addItem(
           menuLabel,
-          event -> {
-            navigator.navigateTo(viewName);
-          });
+          event -> navigator.navigateTo(viewName));
     }
     navigator.addProvider(viewProvider);
     setNavigator(navigator);
