@@ -8,10 +8,10 @@ import lombok.Value;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class HorseData {
-	private String horseName;
-	private String horseDetailText;
-	private String horseCode;
-	private boolean active;
-	private int headNumberCount;
-	private int harnessNumberCount;
+  private String horseName;
+  private String horseDetailText;
+  private String horseCode;
+  private boolean active;
+  private int headNumberCount;
+  private int harnessNumberCount;
 }

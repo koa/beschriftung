@@ -1,15 +1,14 @@
 package ch.teamkoenig.tool.beschriftung.layout;
 
-import java.io.IOException;
-
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+
+import java.io.IOException;
 
 public interface Drawable {
 
-	void draw(PdfCanvas canvas) throws IOException;
+  void draw(PdfCanvas canvas) throws IOException;
 
-	float getHeight();
+  float getHeight();
 
-	float getWidth();
-
+  float getWidth();
 }
