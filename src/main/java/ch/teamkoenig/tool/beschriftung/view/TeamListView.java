@@ -72,6 +72,7 @@ public class TeamListView extends CustomComponent implements View {
           clientStorage.getLocalItem(
               "horse-data",
               value -> {
+                if (value == null) return;
                 try {
                   final List<TeamData> readValue = reader.readValue(value);
                   teamList.clear();
@@ -402,6 +403,7 @@ public class TeamListView extends CustomComponent implements View {
                                 teamList.clear();
                                 teamList.addAll(readValue);
                                 teamDataProvider.refreshAll();
+                                updaterRef.get().run();
                               } catch (final IOException e) {
                                 log.info("Cannot parse data", e);
                               }
