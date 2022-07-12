@@ -30,10 +30,10 @@ public class HarnessNumberLayout implements Drawable {
    */
   @Override
   public void draw(final PdfCanvas canvas) throws IOException {
-    final float x = 10 * MM;
+    final float x = 20 * MM;
     final float y = 0 * MM;
     final float width = 70 * MM;
-    final float height = 60 * MM;
+    final float height = 80 * MM;
 
     final int numberFontSize = 96;
     final int nameSize = 18;
@@ -46,7 +46,8 @@ public class HarnessNumberLayout implements Drawable {
     canvas.curveTo(x - height / 3, y + height / 2, x, y);
     canvas.stroke();
     final PdfFont font = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
-    final VerticalTextDistribution textDistribution = new VerticalTextDistribution(height);
+    final VerticalTextDistribution textDistribution =
+        new VerticalTextDistribution(height + 25 * MM);
 
     final String allName = name + nameDetail;
 
@@ -60,7 +61,8 @@ public class HarnessNumberLayout implements Drawable {
     canvas.beginText();
     canvas.setFontAndSize(font, numberFontSize);
     canvas.moveText(
-        x + width / 2 - font.getWidth(number, numberFontSize) / 2, y + textVerticalpos.get(0));
+        x + width / 2 - font.getWidth(number, numberFontSize) / 2,
+        y + textVerticalpos.get(0) - 20 * MM);
     canvas.showText(number);
     canvas.endText();
     canvas.restoreState();
@@ -87,7 +89,7 @@ public class HarnessNumberLayout implements Drawable {
    */
   @Override
   public float getHeight() {
-    return 60 * MM;
+    return 95 * MM;
   }
 
   /*
@@ -97,6 +99,6 @@ public class HarnessNumberLayout implements Drawable {
    */
   @Override
   public float getWidth() {
-    return 90 * MM;
+    return 115 * MM;
   }
 }
