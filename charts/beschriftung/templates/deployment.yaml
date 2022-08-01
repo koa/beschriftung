@@ -1,3 +1,8 @@
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: {{ .Chart.Name }}
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
