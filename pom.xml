@@ -155,7 +155,37 @@
                     </container>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <artifactId>helm-maven-plugin</artifactId>
+                <configuration>
+                    <appVersion>${project.version}</appVersion>
+                    <chartDirectory>${project.basedir}/src/main/helm</chartDirectory>
+                    <chartVersion>${project.version}</chartVersion>
+                    <helmVersion>3.11.2</helmVersion>
+                    <uploadRepoSnapshot>
+                        <name>helm-snapshots</name>
+                        <type>NEXUS</type>
+                        <url>https://nexus.berg-turbenthal.ch/repository/helm-snapshot/</url>
+                    </uploadRepoSnapshot>
+                    <uploadRepoStable>
+                        <name>helm-releases</name>
+                        <type>NEXUS</type>
+                        <url>https://nexus.berg-turbenthal.ch/repository/helm/</url>
+                    </uploadRepoStable>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>init</goal>
+                            <goal>lint</goal>
+                            <goal>package</goal>
+                            <goal>upload</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <groupId>io.kokuwa.maven</groupId>
+                <version>6.6.1</version>
+            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>

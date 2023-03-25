@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "beschriftung.fullname" . }}
+  labels:
+    {{- include "beschriftung.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "beschriftung.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "beschriftung.selectorLabels" . | nindent 8 }}
+{{- if .Values.podAnnotations }}
+      annotations:
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}
+    spec:
+      serviceAccountName: {{ .Chart.Name }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{- include "beschriftung.version" . }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: MANAGEMENT_SERVER_PORT
+          value: "{{ .Values.service.managementPort }}"       
+        ports:
+        - containerPort: {{ .Values.service.internalPort }}
+          name: http
+        - containerPort: {{ .Values.service.managementPort }}
+          name: management
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: management
+          initialDelaySeconds: 65
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: management
+          initialDelaySeconds: 5
+          failureThreshold: 60
+          periodSeconds: 1
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}

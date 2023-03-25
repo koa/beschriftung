@@ -1,0 +1,20 @@
+{{- if .Values.ingress.enabled}}
+{{- if .Values.ingress.certificate.enabled}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ template "beschriftung.fullname" . }}
+  labels:
+    {{- include "beschriftung.labels" . | nindent 4 }}
+spec:
+  commonName: {{.Values.ingress.hostname}}
+  dnsNames:
+    - {{.Values.ingress.hostname}}
+  duration: {{.Values.ingress.certificate.duration}}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{.Values.ingress.certificate.clusterIssuer}}
+  renewBefore: {{.Values.ingress.certificate.renewBefore}}
+  secretName: {{ template "beschriftung.fullname" . }}-tls
+{{- end}}
+{{- end}}
