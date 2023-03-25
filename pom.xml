@@ -251,8 +251,9 @@
         </snapshotRepository>
     </distributionManagement>
     <scm>
+        <url>https://github.com/koa/raoa2</url>
         <connection>scm:git:git://github.com/koa/beschriftung</connection>
-        <developerConnection>scm:git:git://github.com/koa/beschriftung</developerConnection>
+        <developerConnection>scm:git:https://github.com/koa/beschriftung.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
     <profiles>
