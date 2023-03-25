@@ -1,9 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>tool.teamkoenig.ch</groupId>
     <artifactId>beschriftung</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -212,7 +211,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <execute/>
+                                        <execute />
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
@@ -254,7 +253,7 @@
         <url>https://github.com/koa/raoa2</url>
         <connection>scm:git:git://github.com/koa/beschriftung</connection>
         <developerConnection>scm:git:https://github.com/koa/beschriftung.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>beschriftung-0.0.1</tag>
     </scm>
     <profiles>
         <profile>
